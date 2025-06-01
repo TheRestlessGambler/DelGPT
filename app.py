@@ -5,7 +5,7 @@ from del_persona import get_del_prompt
 
 st.set_page_config(page_title="DelGPT — AI Powered Kashmiri", layout="centered")
 
-# ---- Session State Init ----
+# ------------------ SESSION STATE INIT ------------------ #
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {"role": "assistant", "content": "Bol kya chahiye bhai 👇 (but make it quick, I'm busy af)"}
@@ -13,12 +13,12 @@ if "messages" not in st.session_state:
 if "is_del" not in st.session_state:
     st.session_state.is_del = False
 
-# ---- Check if user says "I'm Del" in this session ----
-def detect_del_identity(msg):
-    triggers = ["i am del", "i'm del", "me del", "mai del", "main del hoon"]
-    return any(trigger in msg.lower() for trigger in triggers)
+# ------------------ DETECT "I am Del" FLEXIBLY ------------------ #
+def detect_del_identity(text):
+    text = text.lower()
+    return "del" in text and any(phrase in text for phrase in ["i am", "i'm", "me", "mai", "main"])
 
-# ---- White Theme CSS (Triggered when user says "I am Del") ----
+# ------------------ APPLY WHITE THEME IF DEL ------------------ #
 if st.session_state.is_del:
     st.markdown("""
         <style>
@@ -26,43 +26,43 @@ if st.session_state.is_del:
             background-color: #ffffff !important;
             color: #000000 !important;
         }
-        .css-1cpxqw2, .css-13sdm1v, .css-1y4p8pa, .stTextInput>div>div>input {
+        .stChatMessage, .stTextInput, .stTextArea {
+            border: 1px solid #222 !important;
+            border-radius: 6px;
+        }
+        .css-1cpxqw2, .stTextInput>div>div>input {
             background-color: #f6f6f6 !important;
             color: black !important;
             border: 1px solid #222 !important;
         }
-        .stChatMessage, .stTextInput, .stTextArea {
-            border: 1px solid #aaa !important;
-            border-radius: 6px;
-        }
-        .stTextInput>div>div, .stTextArea>div>div {
-            background-color: #fdfdfd !important;
-            color: black !important;
-        }
         </style>
     """, unsafe_allow_html=True)
 
-# ---- Title ----
+# ------------------ HEADER ------------------ #
 st.markdown("## 🧠 DelGPT — AI Powered Kashmiri Engineer")
-st.caption("Gemini-powered chatbot. Expect Hinglish, sarcasm, tech obsessions & zero patience.")
+st.caption("Built on Gemini. Expect Hinglish, sarcasm, tech gyaan, and mood swings.")
 
-# ---- Show Messages ----
+# ------------------ SHOW CHAT HISTORY ------------------ #
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
+# ------------------ USER INPUT ------------------ #
 if user_input := st.chat_input("Message DelGPT..."):
-    # ✅ Detect and set Del mode BEFORE anything else
-    if detect_del_identity(user_input):
+
+    # First: detect Del mode before doing anything else
+    if not st.session_state.is_del and detect_del_identity(user_input):
         st.session_state.is_del = True
 
-    # ✅ Show user message
+    # Show + save user input
     with st.chat_message("user"):
         st.markdown(user_input)
     st.session_state.messages.append({"role": "user", "content": user_input})
 
-    # ✅ Get response
+    # Prepare Gemini prompt using Del persona
     prompt = get_del_prompt(user_input)
+
+    # Get response from Gemini
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         full_response = ""
@@ -76,8 +76,7 @@ if user_input := st.chat_input("Message DelGPT..."):
             full_response += word + " "
             time.sleep(0.035)
             message_placeholder.markdown(full_response + "▌")
-
         message_placeholder.markdown(full_response)
 
+    # Store bot response
     st.session_state.messages.append({"role": "assistant", "content": full_response})
-
