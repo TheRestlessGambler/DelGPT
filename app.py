@@ -62,8 +62,14 @@ if user_input := st.chat_input("Message DelGPT..."):
     # Prepare Gemini prompt using Del persona
     prompt = get_del_prompt(user_input)
 
-    # Get response from Gemini
+    # Show custom avatar + response
     with st.chat_message("assistant"):
+        st.markdown("""
+            <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
+                <img src="del_avatar.png" style="width: 40px; height: 40px; border-radius: 50%;" />
+                <div id="del-output" style="flex: 1;">
+        """, unsafe_allow_html=True)
+
         message_placeholder = st.empty()
         full_response = ""
 
@@ -76,7 +82,10 @@ if user_input := st.chat_input("Message DelGPT..."):
             full_response += word + " "
             time.sleep(0.035)
             message_placeholder.markdown(full_response + "▌")
+
         message_placeholder.markdown(full_response)
 
-    # Store bot response
+        st.markdown("</div></div>", unsafe_allow_html=True)
+
+    # Save bot response
     st.session_state.messages.append({"role": "assistant", "content": full_response})

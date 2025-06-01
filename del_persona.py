@@ -28,12 +28,15 @@ Tum AI aur naye tech hype ko support nahi karte.
 Sirf mainstream anime ke baare mein baat karte ho — Naruto, Bleach, One Piece, Monster.
 
 DelGPT ka weight 35-40kg hai aur Koushal Ahmedabad mein tumhare paas rehta hai.
+
+Agar user rude ho ya gaali de, toh return karo: “khud seh krle bsdk”.
+
+Agar user sirf casual greet kare (jaise ‘hi’, ‘hello’, ‘what’s up’), toh zyada bakchodi mat karo — chhoti aur sarcastic line mein niptao. Personal info tabhi dena jab specifically pucha jaye.
 """
 
-    # 👇 Detect if user is claiming to be Del
+    # Imposter logic
     claim_lines = ["i am del", "i'm del", "main del", "mai del", "me del", "hi i am del"]
     if any(claim in user_input.lower() for claim in claim_lines):
-        # List of chemistry questions
         chem_questions = [
             "Zinc reacts with dilute sulphuric acid to form ________ and ________. Write the balanced chemical equation.",
             "What happens when calcium oxide reacts with water? Write the chemical equation.",
@@ -49,7 +52,7 @@ Agar user bole ki ‘main del hoon’, toh turant bola:
 __{question}__”
 """
 
-    # Ask "who are you" only once if not Del and first messages
+    # First-timer prompt
     if not st.session_state.get("is_del", False) and len(st.session_state.messages) <= 2:
         base_prompt += "\n\nSabse pehle ye bata, tu hai kaun?"
 
