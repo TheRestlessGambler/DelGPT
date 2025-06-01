@@ -94,10 +94,11 @@ if user_input := st.chat_input("Message DelGPT..."):
         except Exception as e:
             del_response = f"❌ Error aagya bhai — {str(e)}"
 
-        for word in del_response.split():
-            full_response += word + " "
-            time.sleep(0.035)
+        for char in del_response:
+            full_response += char
+            time.sleep(0.005)
             message_placeholder.markdown(full_response + "▌")
+
 
         # Clear placeholder and re-render full_response properly
         message_placeholder.empty()
