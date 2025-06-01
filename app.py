@@ -35,11 +35,21 @@ if st.session_state.is_del:
         }
         .css-1cpxqw2, .stTextInput>div>div>input {
             background-color: #f6f6f6 !important;
-            color: black !important;
+            color: #000000 !important;
             border: 1px solid #222 !important;
+        }
+        .stMarkdown, .stMarkdown p, .stMarkdown span, .css-10trblm, .css-1v0mbdj {
+            color: #000000 !important;
+        }
+        .stCaption {
+            color: #000000 !important;
+        }
+        .stTextInput input {
+            color: #000000 !important;
         }
         </style>
     """, unsafe_allow_html=True)
+
 
 # --------------- Header ------------------------ #
 st.markdown("## 🧠 DelGPT — AI Powered Kashmiri Engineer")
