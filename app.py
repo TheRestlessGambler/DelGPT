@@ -4,24 +4,24 @@ import os
 from gemini_api import get_gemini_response
 from del_persona import get_del_prompt
 
-# Setup absolute path to the avatar image
+# Setup avatar path
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 AVATAR_PATH = os.path.join(BASE_DIR, "del_avatar.png")
 
 st.set_page_config(page_title="DelGPT — AI Powered Kashmiri", layout="centered")
 
-# --------------- Session State ---------------- #
+# Session State
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "Bol kya chahiye bhai 👇 (but make it quick, I'm busy af)"}]
 if "is_del" not in st.session_state:
     st.session_state.is_del = False
 
-# --------------- Detect "I am Del" ------------- #
+# Identity Detection
 def detect_del_identity(text):
     text = text.lower()
     return "del" in text and any(x in text for x in ["i am", "i'm", "mai", "main", "me"])
 
-# --------------- White Theme for Del ----------- #
+# Apply White Theme
 if st.session_state.is_del:
     st.markdown("""
         <style>
@@ -29,60 +29,50 @@ if st.session_state.is_del:
             background-color: #ffffff !important;
             color: #000000 !important;
         }
-        .stChatMessage, .stTextInput, .stTextArea {
-            border: 1px solid #222 !important;
-            border-radius: 6px;
-        }
-        .css-1cpxqw2, .stTextInput>div>div>input {
-            background-color: #f6f6f6 !important;
-            color: #000000 !important;
-            border: 1px solid #222 !important;
-        }
-        .stMarkdown, .stMarkdown p, .stMarkdown span, .css-10trblm, .css-1v0mbdj {
-            color: #000000 !important;
-        }
-        .stCaption {
-            color: #000000 !important;
-        }
-        .stTextInput input {
-            color: #000000 !important;
-        }
         </style>
     """, unsafe_allow_html=True)
 
-# --------------- Header ------------------------ #
+# Header
 st.markdown("## 🧠 DelGPT — AI Powered Kashmiri Engineer")
 st.caption("Built on Gemini. Expect Hinglish, sarcasm, tech gyaan, and mood swings.")
 
-# --------------- Chat UI ----------------------- #
+# Show past messages
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         if msg["role"] == "assistant" and os.path.exists(AVATAR_PATH):
             st.image(AVATAR_PATH, width=40)
-        st.markdown(msg["content"])
 
-# --------------- Chat Input -------------------- #
+        content = msg["content"]
+        if "```" in content:
+            parts = content.split("```")
+            for i, part in enumerate(parts):
+                if i % 2 == 0:
+                    st.markdown(part)
+                else:
+                    st.code(part.strip())
+        else:
+            st.markdown(content)
+
+# Chat input
 if user_input := st.chat_input("Message DelGPT..."):
 
-    # Theme trigger on claiming to be Del
+    # Detect if user is pretending to be Del
     if not st.session_state.is_del and detect_del_identity(user_input):
         st.session_state.is_del = True
 
-    # Show user message
+    st.session_state.messages.append({"role": "user", "content": user_input})
     with st.chat_message("user"):
         st.markdown(user_input)
-    st.session_state.messages.append({"role": "user", "content": user_input})
 
-    # Build full conversation string
+    # Build conversation context
     conversation = ""
     for msg in st.session_state.messages:
         role = "User" if msg["role"] == "user" else "Del"
         conversation += f"{role}: {msg['content']}\n"
 
-    # Build final prompt
     prompt = get_del_prompt(conversation)
 
-    # Assistant response section
+    # Assistant response
     with st.chat_message("assistant"):
         if os.path.exists(AVATAR_PATH):
             st.image(AVATAR_PATH, width=40)
@@ -101,4 +91,4 @@ if user_input := st.chat_input("Message DelGPT..."):
 
         message_placeholder.markdown(full_response)
 
-    st.session_state.messages.append({"role": "assistant", "content": full_response})
+    st.session_state.messages.append({"role": "assistant", "content": del_response})
