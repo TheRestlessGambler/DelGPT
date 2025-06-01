@@ -3,7 +3,8 @@ from gemini_api import get_gemini_response
 from del_persona import get_del_prompt
 
 st.set_page_config(page_title="DelGPT")
-st.title("💬 DelGPT — AI-powered Kashmiri")
+
+st.title("💬 DelGPT — Your Tech Bro with Attitude")
 
 user_input = st.text_input("You:", key="input")
 
