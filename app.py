@@ -62,7 +62,6 @@ for msg in st.session_state.messages:
 # Chat input
 if user_input := st.chat_input("Message DelGPT..."):
 
-    # Detect if user is pretending to be Del
     if not st.session_state.is_del and detect_del_identity(user_input):
         st.session_state.is_del = True
 
@@ -87,6 +86,11 @@ if user_input := st.chat_input("Message DelGPT..."):
 
         try:
             del_response = get_gemini_response(prompt)
+
+            # Auto-wrap with ``` if code detected but not formatted
+            if ("def " in del_response or "print(" in del_response) and "```" not in del_response:
+                del_response = f"```python\n{del_response.strip()}\n```"
+
         except Exception as e:
             del_response = f"❌ Error aagya bhai — {str(e)}"
 
