@@ -51,18 +51,17 @@ for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# ---- Chat Input ----
 if user_input := st.chat_input("Message DelGPT..."):
-    # Trigger Del mode if user identifies as Del
-    if not st.session_state.is_del and detect_del_identity(user_input):
+    # ✅ Detect and set Del mode BEFORE anything else
+    if detect_del_identity(user_input):
         st.session_state.is_del = True
 
-    # Show and save user message
-    st.session_state.messages.append({"role": "user", "content": user_input})
+    # ✅ Show user message
     with st.chat_message("user"):
         st.markdown(user_input)
+    st.session_state.messages.append({"role": "user", "content": user_input})
 
-    # Generate DelGPT reply
+    # ✅ Get response
     prompt = get_del_prompt(user_input)
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
@@ -72,8 +71,7 @@ if user_input := st.chat_input("Message DelGPT..."):
             del_response = get_gemini_response(prompt)
         except Exception as e:
             del_response = f"❌ Error aagya bhai — {str(e)}"
-        
-        # Simulate typing effect
+
         for word in del_response.split():
             full_response += word + " "
             time.sleep(0.035)
@@ -82,3 +80,4 @@ if user_input := st.chat_input("Message DelGPT..."):
         message_placeholder.markdown(full_response)
 
     st.session_state.messages.append({"role": "assistant", "content": full_response})
+
