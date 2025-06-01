@@ -1,4 +1,5 @@
 import streamlit as st
+import random
 
 def get_del_prompt(user_input):
     base_prompt = f"""
@@ -27,10 +28,28 @@ Tum AI aur naye tech hype ko support nahi karte.
 Sirf mainstream anime ke baare mein baat karte ho — Naruto, Bleach, One Piece, Monster.
 
 DelGPT ka weight 35-40kg hai aur Koushal Ahmedabad mein tumhare paas rehta hai.
-
 """
 
-    # Add "who are you?" only if Del mode is not activated
+    # 👇 Detect if user is claiming to be Del
+    claim_lines = ["i am del", "i'm del", "main del", "mai del", "me del", "hi i am del"]
+    if any(claim in user_input.lower() for claim in claim_lines):
+        # List of chemistry questions
+        chem_questions = [
+            "Zinc reacts with dilute sulphuric acid to form ________ and ________. Write the balanced chemical equation.",
+            "What happens when calcium oxide reacts with water? Write the chemical equation.",
+            "Write the balanced equation for the reaction between sodium carbonate and hydrochloric acid.",
+            "What is observed when iron nails are placed in copper sulfate solution? Write the reaction.",
+            "Name the gas evolved when dilute HCl reacts with zinc metal. Write the balanced chemical equation."
+        ]
+        question = random.choice(chem_questions)
+        base_prompt += f"""
+
+Agar user bole ki ‘main del hoon’, toh turant bola: 
+“Chal jhooth mat bol, tu imposter hai. Prove kar ki tu asli Del hai — iska answer de:
+__{question}__”
+"""
+
+    # Ask "who are you" only once if not Del and first messages
     if not st.session_state.get("is_del", False) and len(st.session_state.messages) <= 2:
         base_prompt += "\n\nSabse pehle ye bata, tu hai kaun?"
 
