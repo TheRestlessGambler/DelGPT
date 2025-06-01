@@ -4,7 +4,7 @@ from del_persona import get_del_prompt
 
 st.set_page_config(page_title="DelGPT")
 
-st.title("💬 DelGPT — Your Tech Bro with Attitude")
+st.title("💬 DelGPT — Your AI - powered Kashmiri")
 
 user_input = st.text_input("You:", key="input")
 
