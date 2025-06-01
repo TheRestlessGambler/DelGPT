@@ -1,5 +1,7 @@
 import streamlit as st
 import time
+from pathlib import Path
+import base64
 from gemini_api import get_gemini_response
 from del_persona import get_del_prompt
 
@@ -17,6 +19,16 @@ if "is_del" not in st.session_state:
 def detect_del_identity(text):
     text = text.lower()
     return "del" in text and any(phrase in text for phrase in ["i am", "i'm", "me", "mai", "main"])
+
+# ------------------ LOAD AVATAR IMAGE AS BASE64 ------------------ #
+def get_encoded_avatar():
+    avatar_path = Path("del_avatar.png")
+    if avatar_path.exists():
+        with open(avatar_path, "rb") as f:
+            return base64.b64encode(f.read()).decode()
+    return ""
+
+avatar_base64 = get_encoded_avatar()
 
 # ------------------ APPLY WHITE THEME IF DEL ------------------ #
 if st.session_state.is_del:
@@ -62,13 +74,16 @@ if user_input := st.chat_input("Message DelGPT..."):
     # Prepare Gemini prompt using Del persona
     prompt = get_del_prompt(user_input)
 
-    # Show custom avatar + response
+    # Show assistant with avatar
     with st.chat_message("assistant"):
-        st.markdown("""
-            <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
-                <img src="del_avatar.png" style="width: 40px; height: 40px; border-radius: 50%;" />
-                <div id="del-output" style="flex: 1;">
-        """, unsafe_allow_html=True)
+        if avatar_base64:
+            st.markdown(f"""
+                <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
+                    <img src="data:image/png;base64,{avatar_base64}" style="width: 40px; height: 40px; border-radius: 50%;" />
+                    <div style="flex: 1;">
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown('<div style="margin-left: 50px;">', unsafe_allow_html=True)
 
         message_placeholder = st.empty()
         full_response = ""
@@ -84,7 +99,6 @@ if user_input := st.chat_input("Message DelGPT..."):
             message_placeholder.markdown(full_response + "▌")
 
         message_placeholder.markdown(full_response)
-
         st.markdown("</div></div>", unsafe_allow_html=True)
 
     # Save bot response
