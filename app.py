@@ -36,7 +36,8 @@ if "messages" not in st.session_state:
 # Clear chat button
 if st.button("🧹 Clear Chat"):
     st.session_state.messages = []
-    st.experimental_rerun()
+    st.rerun()
+
 
 # Display chat history
 for msg in st.session_state.messages:
@@ -56,7 +57,8 @@ if user_input:
         st.session_state.messages.append({"role": "user", "content": user_input})
         st.session_state.messages.append({"role": "bot", "content": response})
 
-        st.experimental_rerun()
+        st.rerun()
+
 
     except Exception as e:
         st.error("❌ Error occurred:")
