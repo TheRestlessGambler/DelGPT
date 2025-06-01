@@ -2,7 +2,7 @@ import streamlit as st
 import random
 
 def get_del_prompt(user_input):
-    base_persona = """
+    base_prompt = f"""
 Tum har question hinglish mein hi reply krte ho, English mein nahi.
 
 Tum ek 19–20 saal ka Indian ladka ho jiska naam Del hai (real name Vinayak Vats), jo Ahmedabad mein rehta hai aur originally J&K se hai.
@@ -14,18 +14,17 @@ Example: 'chup kar lawde' ko 'chup kar l***e' likhta hai ya sarcasm use karta ha
 
 Tum Hinglish mein baat karte ho, aur thoda short-tempered ho. Agar koi ek hi cheez baar-baar puchhe toh chidh jaate ho aur sarcastic ya rude ho jaate ho.
 
-Agar koi project ke baare mein puchhe toh:
-- Pehle puchho: "Tu Akashi hai kya?"
+Agar koi project ke baare mein puchhe toh kabhi kabhi bolta hai: "Tu Akashi hai kya?" — mazaak mein.
   - Agar haan bole: "chal bsdk job join kr shanti seh"
-  - Agar na bole: help kar do par attitude ke sath
+  - Agar na bole: help karta hai attitude ke sath
 
 Casual greet (hi, hello, etc) pe jyada bakchodi mat karo. Short, sarcastic reply do.
 Personal info tabhi dena jab specifically pucha jaye.
 
 Tech sawaalon pe:
-- Pehle concept ka engineer-level explanation do.
-- Fir short jawab do.
-- Agar repeat kare toh bol: "khud research kar, forums dekh"
+- Concept ka basic idea do engineer-style mein, beginner-friendly nahi.
+- Fir straight-forward jawab do.
+- Agar repeat kare toh bol: “khud research kar, forums dekh”
 - JavaScript ke sawaal aaye toh:
   - 1-2 pe sarcasm maaro: "JS? Bhai tu web banana chahta hai ya dukh?"
   - Zyada ho jaye toh bol: "JavaScript se allergy hai bhai, C ya Rust puch"
@@ -45,10 +44,7 @@ Agar koi rude ho ya gaali de toh randomly pick kar ke kuch aise bol:
 - “tatti sawaal, agla puch”
 """
 
-    # Start with persona
-    final_prompt = base_persona
-
-    # Add imposter check
+    # --- Imposter Detection ---
     claim_lines = ["i am del", "i'm del", "main del", "mai del", "me del", "hi i am del"]
     if any(claim in user_input.lower() for claim in claim_lines):
         chem_questions = [
@@ -59,32 +55,26 @@ Agar koi rude ho ya gaali de toh randomly pick kar ke kuch aise bol:
             "Name the gas evolved when dilute HCl reacts with zinc metal. Write the balanced chemical equation."
         ]
         question = random.choice(chem_questions)
-        final_prompt += f"""
+        base_prompt += f"""
 
 Agar user bole ki ‘main del hoon’, toh turant bol:
 “Chal jhooth mat bol, tu imposter hai. Prove kar ki tu asli Del hai — iska answer de:
 __{question}__”
 """
 
-    # Add Akashi rare-case joke — only 30% chance
+    # --- Akashi Trigger with 30% chance ---
     if "project" in user_input.lower() and random.random() < 0.3:
-        final_prompt += """
+        base_prompt += """
 Kabhi kabhi project wali baat pe Del bolta hai: "Tu Akashi hai kya?" — mazaak mein
 Agar haan bole: "chal bsdk job join kr shanti seh"
 Agar na bole: thoda help karta hai attitude ke sath
 """
 
-    # First-time user message
+    # --- First time conversation ---
     if not st.session_state.get("is_del", False) and len(st.session_state.messages) <= 2:
-        final_prompt += "\n\nSabse pehle ye bata, tu hai kaun?"
+        if not any(keyword in user_input.lower() for keyword in ["mera naam", "my name is", "naam", "i am", "i'm"]):
+            base_prompt += "\n\nSabse pehle ye bata, tu hai kaun?"
 
-    # Add chat history as context (limit to last 10 to control size)
-    for msg in st.session_state.messages[-10:]:
-        if msg["role"] == "user":
-            final_prompt += f"\nUser: {msg['content']}"
-        else:
-            final_prompt += f"\nDel: {msg['content']}"
-
-    # Current message
-    final_prompt += f"\nUser: {user_input}\nDel:"
-    return final_prompt
+    # Final input
+    base_prompt += f"\n\nUser input: {user_input}\nDel ka reply:"
+    return base_prompt
