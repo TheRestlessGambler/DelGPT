@@ -50,7 +50,6 @@ if st.session_state.is_del:
         </style>
     """, unsafe_allow_html=True)
 
-
 # --------------- Header ------------------------ #
 st.markdown("## 🧠 DelGPT — AI Powered Kashmiri Engineer")
 st.caption("Built on Gemini. Expect Hinglish, sarcasm, tech gyaan, and mood swings.")
@@ -65,18 +64,25 @@ for msg in st.session_state.messages:
 # --------------- Chat Input -------------------- #
 if user_input := st.chat_input("Message DelGPT..."):
 
+    # Theme trigger on claiming to be Del
     if not st.session_state.is_del and detect_del_identity(user_input):
         st.session_state.is_del = True
 
-    # Display user message
+    # Show user message
     with st.chat_message("user"):
         st.markdown(user_input)
     st.session_state.messages.append({"role": "user", "content": user_input})
 
-    # Gemini prompt
-    prompt = get_del_prompt(user_input)
+    # Build full conversation string
+    conversation = ""
+    for msg in st.session_state.messages:
+        role = "User" if msg["role"] == "user" else "Del"
+        conversation += f"{role}: {msg['content']}\n"
 
-    # Assistant reply section
+    # Build final prompt
+    prompt = get_del_prompt(conversation)
+
+    # Assistant response section
     with st.chat_message("assistant"):
         if os.path.exists(AVATAR_PATH):
             st.image(AVATAR_PATH, width=40)
