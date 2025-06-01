@@ -47,9 +47,15 @@ for msg in st.session_state.messages:
             parts = content.split("```")
             for i, part in enumerate(parts):
                 if i % 2 == 0:
-                    st.markdown(part)
+                    if part.strip():
+                        st.markdown(part.strip())
                 else:
-                    st.code(part.strip())
+                    lang = ""
+                    if part.strip().startswith(("python", "js", "javascript", "html", "bash")):
+                        lang, code = part.strip().split("\n", 1)
+                        st.code(code, language=lang.strip())
+                    else:
+                        st.code(part.strip())
         else:
             st.markdown(content)
 
@@ -89,6 +95,22 @@ if user_input := st.chat_input("Message DelGPT..."):
             time.sleep(0.035)
             message_placeholder.markdown(full_response + "▌")
 
-        message_placeholder.markdown(full_response)
+        # Clear placeholder and re-render full_response properly
+        message_placeholder.empty()
+        if "```" in full_response:
+            parts = full_response.split("```")
+            for i, part in enumerate(parts):
+                if i % 2 == 0:
+                    if part.strip():
+                        message_placeholder.markdown(part.strip())
+                else:
+                    lang = ""
+                    if part.strip().startswith(("python", "js", "javascript", "html", "bash")):
+                        lang, code = part.strip().split("\n", 1)
+                        message_placeholder.code(code, language=lang.strip())
+                    else:
+                        message_placeholder.code(part.strip())
+        else:
+            message_placeholder.markdown(full_response)
 
     st.session_state.messages.append({"role": "assistant", "content": del_response})
