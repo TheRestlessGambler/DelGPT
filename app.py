@@ -4,10 +4,6 @@ import os
 from gemini_api import get_gemini_response
 from del_persona import get_del_prompt
 
-# Setup avatar path
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-AVATAR_PATH = os.path.join(BASE_DIR, "del_avatar.png")
-
 st.set_page_config(page_title="DelGPT — AI Powered Kashmiri", layout="centered")
 
 # Session State
@@ -39,9 +35,6 @@ st.caption("Built on Gemini. Expect Hinglish, sarcasm, tech gyaan, and mood swin
 # Show past messages
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
-        if msg["role"] == "assistant" and os.path.exists(AVATAR_PATH):
-            st.image(AVATAR_PATH, width=40)
-
         content = msg["content"]
         if "```" in content:
             parts = content.split("```")
@@ -79,15 +72,13 @@ if user_input := st.chat_input("Message DelGPT..."):
 
     # Assistant response
     with st.chat_message("assistant"):
-        if os.path.exists(AVATAR_PATH):
-            st.image(AVATAR_PATH, width=40)
-        message_placeholder = st.empty()
+        container = st.container()
+        typing_response = ""
         full_response = ""
 
         try:
             del_response = get_gemini_response(prompt)
 
-            # Auto-wrap with ``` if code detected but not formatted
             if ("def " in del_response or "print(" in del_response) and "```" not in del_response:
                 del_response = f"```python\n{del_response.strip()}\n```"
 
@@ -95,27 +86,27 @@ if user_input := st.chat_input("Message DelGPT..."):
             del_response = f"❌ Error aagya bhai — {str(e)}"
 
         for char in del_response:
-            full_response += char
+            typing_response += char
             time.sleep(0.005)
-            message_placeholder.markdown(full_response + "▌")
+            container.markdown(typing_response + "▌")
 
+        container.empty()  # Clear the temporary animated text
 
-        # Clear placeholder and re-render full_response properly
-        message_placeholder.empty()
-        if "```" in full_response:
-            parts = full_response.split("```")
+        # Final render — persistent
+        if "```" in del_response:
+            parts = del_response.split("```")
             for i, part in enumerate(parts):
                 if i % 2 == 0:
                     if part.strip():
-                        message_placeholder.markdown(part.strip())
+                        container.markdown(part.strip())
                 else:
                     lang = ""
                     if part.strip().startswith(("python", "js", "javascript", "html", "bash")):
                         lang, code = part.strip().split("\n", 1)
-                        message_placeholder.code(code, language=lang.strip())
+                        container.code(code, language=lang.strip())
                     else:
-                        message_placeholder.code(part.strip())
+                        container.code(part.strip())
         else:
-            message_placeholder.markdown(full_response)
+            container.markdown(del_response)
 
     st.session_state.messages.append({"role": "assistant", "content": del_response})
